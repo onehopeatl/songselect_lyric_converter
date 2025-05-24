@@ -1,0 +1,5 @@
+# Web app dependencies
+Flask
+Werkzeug
+# PPTX converter dependencies
+python-pptx
