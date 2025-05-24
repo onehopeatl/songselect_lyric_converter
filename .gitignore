@@ -3,7 +3,6 @@
 *.env
 
 
-
 ### VScode Specific Exclusions
 .vscode/*
 !.vscode/settings.json
@@ -47,6 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 ### End MacOS Specific
+
 
 ### Python Specific Exclusions
 # Byte-compiled / optimized / DLL files
