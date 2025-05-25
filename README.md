@@ -36,12 +36,12 @@ SongSelect provides lyrics as a standardized .txt file download. This app is des
 
 ## Run Locally
 (Requires Python 3.x)
-    * Clone the repo
-    * Install dependencies (requirements.txt)
-    * Set an environment variable for your CCLI Copyright License number as follows
-        * `CCLI_LIC_NUM=abc123`
-    * Navigate into the `/app` directory
-    * Start Flask with `python3 webapp.py`  
+  * Clone the repo
+  * Install dependencies (requirements.txt)
+  * Set an environment variable for your CCLI Copyright License number
+    * Example: `CCLI_LIC_NUM=abc123`
+  * Navigate into the `/app` directory
+  * Start Flask with `python3 webapp.py`  
 
 ## Run As a Docker Container
 An example Docker compose file is included in this repo.  
