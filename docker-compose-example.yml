@@ -1,0 +1,18 @@
+name: songselect-lyric-converter
+
+networks:
+  example-net:
+    name: example-net
+    # external: true
+
+services:
+  lyric_converter:
+    container_name: songselect-lyric-converter
+    image: ghcr.io/onehopeatl/songselect_lyric_converter:latest
+    networks:
+      - example-net
+    ports:
+      - 8080:8080
+    environment:
+      - CCLI_LIC_NUM=abc123
+    restart: always
