@@ -11,7 +11,7 @@ A simple web app that converts SongSelect lyric .txt files into PowerPoint .pptx
   * Click "Convert and Download"
   * Downloaded as a .zip containing the .pptx files  
 
-![Lyric Converter App Screenshot 2](assets/OHC-SSLC-FilesSelected.png)  
+<img src="assets/OHC-SSLC-FilesSelected.png" width="550" title="Lyric Converter App Screenshot 2">  
 
 # PPT Slide Formatting
 PPT slides are formatted as follows...
@@ -20,7 +20,7 @@ PPT slides are formatted as follows...
   * Title slide with proper CCLI copyright formatting
   * Lyric slide follow the title slide with text centered in the top half of the slide  
 
-![PPTX File Example](assets/OHC-SSLC-PPTX.png)  
+<img src="assets/OHC-SSLC-PPTX.png" width="550" title="PPTX File Example">  
 
 # SongSelect TXT File Format
 SongSelect provides lyrics as a standardized .txt file download. This app is designed to use the default lyric file formatting without any modifications. The txt file can be downloaded from the Lyrics tab as seen in the screenshot below.  
@@ -28,7 +28,7 @@ SongSelect provides lyrics as a standardized .txt file download. This app is des
 > [!NOTE]
 > A SongSelect login is required to download lyrics.  
 
-![SongSelect File Download Example](assets/SongSelect-Example.png)  
+<img src="assets/SongSelect-Example.png" width="550" title="SongSelect File Download Example">  
 
 # Run the App
 > [!IMPORTANT]
@@ -44,8 +44,11 @@ SongSelect provides lyrics as a standardized .txt file download. This app is des
     * Start Flask with `python3 webapp.py`  
 
 ## Run As a Docker Container
-An example Docker compose file is included in this repo.
-Start the container using compose with `docker compose up -d`  
+An example Docker compose file is included in this repo.  
+Start the container using compose with...
+'''
+docker compose up -d
+'''  
 
 Or run directly from Docker with...
 ```
