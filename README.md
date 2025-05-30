@@ -2,7 +2,7 @@
 A simple web app that converts SongSelect lyric .txt files into PowerPoint .pptx files.
 Can be run locally or as a Docker container.
 
-<img src="assets/OHC-SSLC-Main-Combined.png" width="550" title="Lyric Converter App Screenshot">  
+<img src="assets/OHC-SSLC-Main-Combined.png" max-width=80% height=auto title="Lyric Converter App Screenshot">  
 
 > [!CAUTION]
 > While this app is a web app, it is designed to be run locally or behind a reverse proxy (preferrably with authentication) and not designed to be exposed to the public internet. Do so at your own risk.
@@ -12,7 +12,7 @@ Can be run locally or as a Docker container.
   * Click "Convert to PPTX"
   * Downloaded as a .zip containing the .pptx files  
 
-<img src="assets/OHC-SSLC-FilesSelected-Combined.png" width="550" title="Lyric Converter App Screenshot 2">  
+<img src="assets/OHC-SSLC-FilesSelected-Combined.png" max-width=80% height=auto title="Lyric Converter App Screenshot 2">  
 
 # PPT Slide Formatting
 PPT slides are formatted as follows...
@@ -21,7 +21,7 @@ PPT slides are formatted as follows...
   * Title slide with proper CCLI copyright formatting
   * Lyric slide follow the title slide with text centered in the top half of the slide  
 
-<img src="assets/OHC-SSLC-PPTX.png" width="550" title="PPTX File Example">  
+<img src="assets/OHC-SSLC-PPTX.png" max-width=80% height=auto title="PPTX File Example">  
 
 # SongSelect TXT File Format
 SongSelect provides lyrics as a standardized .txt file download. This app is designed to use the default lyric file formatting without any modifications. The txt file can be downloaded from the Lyrics tab as seen in the screenshot below.  
@@ -29,7 +29,7 @@ SongSelect provides lyrics as a standardized .txt file download. This app is des
 > [!NOTE]
 > A SongSelect login is required to download lyrics.  
 
-<img src="assets/SongSelect-Example.png" width="550" title="SongSelect File Download Example">  
+<img src="assets/SongSelect-Example.png" max-width=80% height=auto title="SongSelect File Download Example">  
 
 # Run the App
 > [!IMPORTANT]
