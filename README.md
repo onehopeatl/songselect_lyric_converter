@@ -1,17 +1,18 @@
 # SongSelect to PowerPoint Converter
-A simple web app that converts SongSelect lyric .txt files into PowerPoint .pptx files. Packaged as a Docker container.
+A simple web app that converts SongSelect lyric .txt files into PowerPoint .pptx files.
+Can be run locally or as a Docker container.
 
-<img src="assets/OHC-SSLC-Main.png" width="550" title="Lyric Converter App Screenshot">  
+<img src="assets/OHC-SSLC-Main-Combined.png" width="550" title="Lyric Converter App Screenshot">  
 
 > [!CAUTION]
 > While this app is a web app, it is designed to be run locally or behind a reverse proxy (preferrably with authentication) and not designed to be exposed to the public internet. Do so at your own risk.
 
 # App Use
   * Add up to 10 SongSelect lyric .txt files at a time
-  * Click "Convert and Download"
+  * Click "Convert to PPTX"
   * Downloaded as a .zip containing the .pptx files  
 
-<img src="assets/OHC-SSLC-FilesSelected.png" width="550" title="Lyric Converter App Screenshot 2">  
+<img src="assets/OHC-SSLC-FilesSelected-Combined.png" width="550" title="Lyric Converter App Screenshot 2">  
 
 # PPT Slide Formatting
 PPT slides are formatted as follows...
@@ -46,9 +47,9 @@ SongSelect provides lyrics as a standardized .txt file download. This app is des
 ## Run As a Docker Container
 An example Docker compose file is included in this repo.  
 Start the container using compose with...
-'''
+```
 docker compose up -d
-'''  
+```
 
 Or run directly from Docker with...
 ```
