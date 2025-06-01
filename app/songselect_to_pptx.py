@@ -93,8 +93,7 @@ def parse_lyrics_file(file_path, ccli_lic_num):
             if ((not line.strip() and
                  txt_parse + 1 < len(lines) and
                  lines[txt_parse+1].strip() and
-                 not section_pattern.match(lines[txt_parse+1]) and
-                 ',' in lines[txt_parse+1]) or
+                 not section_pattern.match(lines[txt_parse+1])) or
                 (line.strip() and metadata_pattern.match(line) and not section_pattern.match(line))):
                 # Skip the blank line if that's what triggered the metadata detection
                 if not line.strip():
@@ -262,7 +261,8 @@ def create_presentation_file(filename, parsed_song, tmp_save_dir):
         text_frame.clear()
         p = text_frame.paragraphs[0]
         p.font.name = font_name
-        p.font.size = Pt(28)
+        p.font.size = Pt(34)
+        p.line_spacing = 1.14
         p.alignment = align_txt_center
         p.font.color.rgb = white_txt
         p.text = section['lyrics']
