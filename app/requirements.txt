@@ -1,5 +1,6 @@
 # Web app dependencies
 Flask
 Werkzeug
+Gunicorn
 # PPTX converter dependencies
 python-pptx

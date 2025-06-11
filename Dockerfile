@@ -12,4 +12,8 @@ RUN pip install -r requirements.txt
 # Expose port 8080 for Flask
 EXPOSE 8080
 
-CMD ["python", "webapp.py"]
+# Run with Flask dev server
+#CMD ["python", "webapp.py"]
+
+# Run with Gunicorn WSGI server
+CMD ["gunicorn","--config", "gunicorn_config.py", "webapp:app"]

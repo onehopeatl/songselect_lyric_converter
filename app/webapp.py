@@ -20,8 +20,9 @@ app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
 # Below is used if a proxy is in front of flask
 # If only using WSGI set to 1
 # If using a reverse proxy with WSGI set to 2
+proxy_num = 2
 app.wsgi_app = ProxyFix(
-    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    app.wsgi_app, x_for=proxy_num, x_proto=proxy_num, x_host=proxy_num, x_prefix=proxy_num
 )
 
 # Set up logging
