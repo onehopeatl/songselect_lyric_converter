@@ -76,10 +76,15 @@
                             </ol>
                         </div>
                         <div class="footer">
-                            <a href="https://github.com/onehopeatl/songselect_lyric_converter" target="_blank" class="github-link">
-                                <img src="{{url_for('static', filename='github_icon.svg')}}" alt="GitHub" class="github-icon">
-                                <span>View on GitHub</span>
-                            </a>
+                            <div>
+                                <a href="https://github.com/onehopeatl/songselect_lyric_converter" target="_blank" class="github-link">
+                                    <img src="{{url_for('static', filename='github_icon.svg')}}" alt="GitHub" class="github-icon">
+                                    <span>View on GitHub</span>
+                                </a>
+                            </div>
+                            <div>
+                                <span class="version-info">{{ sslc_version }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

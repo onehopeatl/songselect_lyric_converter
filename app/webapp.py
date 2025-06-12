@@ -4,6 +4,7 @@ import zipfile
 import tempfile
 import shutil
 import logging
+from pathlib import Path
 from datetime import datetime
 from flask import Flask, render_template, request, flash, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
@@ -11,6 +12,26 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Import functions from your original script
 from songselect_to_pptx import lyric_converter
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
+def get_version():
+    """Get app version"""
+    # Look for app_version file
+    version_file = Path('sslc_app_version')
+    if version_file.exists():
+        return version_file.read_text().strip()
+    
+    # Use env variable if file not found
+    if 'SSLC_APP_VERSION' in os.environ:
+        return os.environ['SSLC_APP_VERSION']
+    
+    # Default value development
+    return 'v0.0.0 (dev-build)'
+
+APP_VERSION = get_version()
+logging.debug(f'APP_VERSION var = {APP_VERSION}')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -24,9 +45,6 @@ proxy_num = 2
 app.wsgi_app = ProxyFix(
     app.wsgi_app, x_for=proxy_num, x_proto=proxy_num, x_host=proxy_num, x_prefix=proxy_num
 )
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -101,7 +119,7 @@ def index():
                 # Cleanup temp pptx dir
                 shutil.rmtree(tmp_pptx_dir_name)
         
-    return render_template('index.html')
+    return render_template('index.html', sslc_version=APP_VERSION)
 
 def allowed_file(filename):
     """Check if the uploaded file is a text file"""
