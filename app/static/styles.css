@@ -627,4 +627,5 @@ ol {
     font-size: 12px;
     color: #757575;
     border: 1px solid var(--input-border);
+    pointer-events: none;
 }
