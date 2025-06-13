@@ -12,9 +12,6 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 # Use DEBUG to get additional info for troubleshooting
 logging.basicConfig(level=logging.INFO)
 
-# SET GLOBAL VARS
-#PRS = Presentation()
-
 def parse_lyrics_file(file_path, ccli_lic_num):
     """
     Parse a CCLI Song Select txt lyrics file to sections and metadata

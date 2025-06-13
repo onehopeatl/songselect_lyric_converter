@@ -566,30 +566,37 @@ ol {
 
 /* Footer Styles */
 .footer {
-    position: relative;
-    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 10px;
 }
 
 .footer a {
     /* color: var(--link-color); */
-    color: #939393;
+    color: #757575;
 }
 
 .footer a:hover {
     /* color: var(--link-hover-color); */
-    color: #939393;
+    color: #757575;
 }
 
 .footer a:visited {
     /* color: var(--link-color); */
-    color: #939393;
+    color: #757575;
     opacity: 0.8;
 }
 
+.footer-separator {
+    margin: 0 15px;
+    color: #757575;
+}
+
 .github-link {
-    padding: 0.375rem 0.5rem;
+    padding: 6px 0px;
+    font-size: 14px;
     text-decoration: none;
-    font-size: 0.875rem;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
@@ -601,4 +608,23 @@ ol {
     height: 16px;
     display: inline-block;
     vertical-align: middle;
+}
+
+.version-label {
+    color: #757575;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.version-info {
+    vertical-align: middle;
+    transition: all 0.3s ease;
+    background-color: var(--file-list-bg);
+    padding: 3px 5px;
+    border-radius: 4px;
+    display: inline-block;
+    font-family: monospace;
+    font-size: 12px;
+    color: #757575;
+    border: 1px solid var(--input-border);
 }
