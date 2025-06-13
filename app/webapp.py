@@ -23,12 +23,12 @@ def get_version():
     if version_file.exists():
         return version_file.read_text().strip()
     
-    # Use env variable if file not found
+    # Alternatively use an env variable
     if 'SSLC_APP_VERSION' in os.environ:
         return os.environ['SSLC_APP_VERSION']
     
-    # Default value development
-    return 'v0.0.0 (dev-build)'
+    # Default value
+    return 'flask-dev-build'
 
 APP_VERSION = get_version()
 logging.debug(f'APP_VERSION var = {APP_VERSION}')

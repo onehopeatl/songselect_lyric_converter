@@ -6,6 +6,10 @@ WORKDIR /app
 # Copy project files into the container
 COPY /app /app
 
+#
+ARG APP_VERSION='docker-dev-build'
+RUN echo $APP_VERSION > sslc_app_version
+
 # Install dependencies
 RUN pip install -r requirements.txt
 

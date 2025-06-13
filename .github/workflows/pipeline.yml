@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths: # only run when app files are changed
+      - 'Dockerfile'
+      - 'app/**'
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
@@ -11,20 +14,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Generate Calendar Version for Tagging
+        id: calver
+        run: |
+          # YYMMDD.mmss format
+          CALVER=$(date +"%y%m%d.%M%S")
+          echo "Generated CalVer Tag: $CALVER"
+          echo "version=$CALVER" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }}
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            APP_VERSION=${{ steps.calver.outputs.version }}
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:${{ steps.calver.outputs.version }}
