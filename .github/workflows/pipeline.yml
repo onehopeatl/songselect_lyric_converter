@@ -18,8 +18,11 @@ jobs:
       - name: Generate Calendar Version for Tagging
         id: calver
         run: |
-          # YYMMDD.mmss format
-          CALVER=$(date +"%y%m%d.%M%S")
+          # YYYY.MM format
+          DATE=$(date +"%Y.%m")
+          # Unique build run number
+          BUILD=${{ github.run_number }}
+          CALVER=$DATE.$BUILD
           echo "Generated CalVer Tag: $CALVER"
           echo "version=$CALVER" >> $GITHUB_OUTPUT
 
