@@ -18,10 +18,13 @@ jobs:
       - name: Generate Calendar Version for Tagging
         id: calver
         run: |
-          # YYMMDD.mmss format
-          CALVER=$(date +"%y%m%d.%M%S")
-          echo "Generated CalVer Tag: $CALVER"
-          echo "version=$CALVER" >> $GITHUB_OUTPUT
+          # YYYY.MM format
+          CALVER=$(date +"%Y.%m")
+          # Unique build run number
+          BUILD=${{ github.run_number }}
+          VER_STR=$CALVER.$BUILD
+          echo "Generated CalVer Tag: $VER_STR"
+          echo "version=$VER_STR" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
