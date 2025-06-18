@@ -22,7 +22,9 @@ jobs:
           DATE=$(date +"%Y.%m")
           # Unique build run number
           BUILD=${{ github.run_number }}
-          CALVER=$DATE.$BUILD
+          # CALVER = YYYY.MM.bN
+          # N = build number
+          CALVER=$DATE.b$BUILD
           echo "Generated CalVer Tag: $CALVER"
           echo "version=$CALVER" >> $GITHUB_OUTPUT
 
