@@ -4,3 +4,4 @@ Werkzeug
 Gunicorn
 # PPTX converter dependencies
 python-pptx
+pillow>=12.1.1 # not directly required, pinned by Snyk to avoid a vulnerability
