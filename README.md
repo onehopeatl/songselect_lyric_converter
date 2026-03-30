@@ -54,5 +54,5 @@ docker compose up -d
 Or run directly from Docker with...
 ```
 docker pull ghcr.io/onehopeatl/songselect_lyric_converter:latest
-docker run -e "CCLI_LIC_NUM=abc123" -p 8080:8080 --name lyric-converter
+docker run -e "CCLI_LIC_NUM=abc123" -p 8080:8080 --name lyric-converter ghcr.io/onehopeatl/songselect_lyric_converter:latest
 ```  
