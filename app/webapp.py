@@ -67,12 +67,11 @@ def index():
         with tempfile.TemporaryDirectory(prefix='ohc-lyrics-') as work_dir:
             with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as bundle:
                 used_names = set()
-                for number, file in enumerate(files, 1):
+                for file in files:
                     content = file.stream.read(MAX_LYRIC_FILE_SIZE + 1)
                     if len(content) > MAX_LYRIC_FILE_SIZE:
                         return render_index('Each lyric file must be 256 KiB or smaller.', 413)
-                    song_dir = Path(work_dir) / str(number)
-                    song_dir.mkdir()
+                    song_dir = Path(tempfile.mkdtemp(prefix='song-', dir=work_dir))
                     input_path = song_dir / 'lyrics.txt'
                     input_path.write_bytes(content)
                     output_path = Path(lyric_converter(input_path, song_dir))
