@@ -1,0 +1,5 @@
+# Direct dependencies. Regenerate requirements.txt after reviewing updates.
+Flask==3.1.3
+Werkzeug==3.1.9
+gunicorn==26.2.0
+python-pptx==1.0.2

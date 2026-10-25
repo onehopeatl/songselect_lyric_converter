@@ -12,7 +12,16 @@ services:
     networks:
       - example-net
     ports:
-      - 8080:8080
+      - "127.0.0.1:8080:8080"
     environment:
       - CCLI_LIC_NUM=abc123
+      # Number of trusted reverse proxies; use 0 for direct access.
+      - TRUSTED_PROXY_COUNT=1
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: always

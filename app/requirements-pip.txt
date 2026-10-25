@@ -1,0 +1,4 @@
+# Build/install tool; audited separately from application dependencies.
+# pip 26.2.2 includes the certificate-store security update (certifi 2026.10.19).
+pip==26.2.2 \
+    --hash=sha256:fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70
