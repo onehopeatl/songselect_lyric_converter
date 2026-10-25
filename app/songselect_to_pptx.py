@@ -3,6 +3,7 @@ import re
 import json
 import os
 import logging
+from werkzeug.utils import secure_filename
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -24,7 +25,7 @@ def parse_lyrics_file(file_path, ccli_lic_num):
         dict: A dictionary containing the parsed song structure
     """
     # Read the file content
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='utf-8-sig') as file:
         content = file.read()
     
     # Initialize the song structure
@@ -35,35 +36,41 @@ def parse_lyrics_file(file_path, ccli_lic_num):
     }
     
     # Extract the title (first non-empty line)
-    lines = content.split('\n')
-    for line in lines:
+    lines = content.splitlines()
+    title_index = None
+    for index, line in enumerate(lines):
         if line.strip():
             song['title'] = line.strip()
+            title_index = index
             break
+    if title_index is None:
+        raise ValueError('The lyric file is empty')
+    if any(len(line) > 4000 for line in lines):
+        raise ValueError('Lyric lines are too long')
     
     # Define a list of potential section headings for regex matching
     # \d* matches numbers after the heading name
     heading_list = [
         'Verse',
-        'Verse \d*',
+        r'Verse \d*',
         'Chorus',
-        'Chorus \d*',
+        r'Chorus \d*',
         'Pre-Chorus',
-        'Pre-Chorus \d*',
+        r'Pre-Chorus \d*',
         'Bridge',
-        'Bridge \d*',
+        r'Bridge \d*',
         'Tag',
-        'Tag \d*',
+        r'Tag \d*',
         'Intro',
-        'Intro \d*',
+        r'Intro \d*',
         'Outro',
-        'Outro \d*',
+        r'Outro \d*',
         'Interlude',
-        'Interlude \d*',
+        r'Interlude \d*',
         'Vamp',
-        'Vamp \d*',
+        r'Vamp \d*',
         'Ending',
-        'Ending \d*'
+        r'Ending \d*'
     ]
     # Regex to identify section headers
     section_pattern = re.compile(r'^(%s)' % '|'.join(heading_list), re.IGNORECASE)
@@ -79,7 +86,7 @@ def parse_lyrics_file(file_path, ccli_lic_num):
     metadata_text = []
     
     # Process lines after the title line
-    txt_parse = lines.index(song['title']) + 1
+    txt_parse = title_index + 1
     while txt_parse < len(lines):
         line = lines[txt_parse]
         # Look ahead to detect metadata section
@@ -141,6 +148,9 @@ def parse_lyrics_file(file_path, ccli_lic_num):
             'lyrics': '\n'.join(current_section_text).strip()
         })
     
+    if not song['sections'] or len(song['sections']) > 200:
+        raise ValueError('Expected between 1 and 200 lyric sections')
+
     # Process metadata
     if metadata_text:
         # Extract authors - typically the first line of metadata
@@ -265,7 +275,9 @@ def create_presentation_file(filename, parsed_song, tmp_save_dir):
         p.text = section['lyrics']
 
     # Save pptx file to directory
-    tmp_save_filepath = os.path.join(tmp_save_dir, filename)
+    # Song titles are untrusted content, never filesystem paths.
+    safe_title = secure_filename(filename)[:150].rstrip('.') or 'song'
+    tmp_save_filepath = os.path.join(tmp_save_dir, safe_title)
     logging.debug(f'tmp_save_filepath var = {tmp_save_filepath}')
     path_filename_extension = tmp_save_filepath + '.pptx'
     logging.debug(f'path_filename_extension var = {path_filename_extension}')
@@ -273,11 +285,11 @@ def create_presentation_file(filename, parsed_song, tmp_save_dir):
     return path_filename_extension
 
 def lyric_converter(txt_file_in, tmp_save_dir):
-    print('[+] Importing SongSelect txt file...')
-    print('[+] Parsing song text and metadata...')
+    logging.debug('[+] Importing SongSelect txt file...')
+    logging.debug('[+] Parsing song text and metadata...')
     parsed_song, pptx_filename = song_to_json(txt_file_in)
-    print('[+] Creating PowerPoint slides...')
+    logging.debug('[+] Creating PowerPoint slides...')
     out_file = create_presentation_file(pptx_filename, parsed_song, tmp_save_dir)
-    print(f'{out_file} successfully saved')
+    logging.debug(f'{out_file} successfully saved')
     logging.debug(parsed_song)
     return out_file

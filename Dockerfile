@@ -1,23 +1,23 @@
 FROM python:3.14-alpine
 
-# Set the working directory
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /app
 
-# Copy project files into the container
-COPY /app /app
+COPY app/requirements-pip.txt app/requirements.txt ./
+RUN apk upgrade --no-cache \
+    && python -m pip install --upgrade --require-hashes -r requirements-pip.txt \
+    && python -m pip --version \
+    && python -m pip install --require-hashes -r requirements.txt \
+    && addgroup -S converter \
+    && adduser -S -G converter converter
 
-#
-ARG APP_VERSION='docker-dev-build'
-RUN echo $APP_VERSION > sslc_app_version
+COPY app/ /app/
+ARG APP_VERSION=docker-dev-build
+RUN printf '%s\n' "$APP_VERSION" > sslc_app_version
 
-# Install dependencies
-RUN pip install -r requirements.txt
-
-# Expose port 8080 for Flask
+USER converter
 EXPOSE 8080
-
-# Run with Flask dev server
-#CMD ["python", "webapp.py"]
-
-# Run with Gunicorn WSGI server
-CMD ["gunicorn","--config", "gunicorn_config.py", "webapp:app"]
+CMD ["gunicorn", "--config", "gunicorn_config.py", "webapp:app"]

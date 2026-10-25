@@ -1,145 +1,132 @@
-
-import os
-import zipfile
-import tempfile
-import shutil
 import logging
+import os
+import tempfile
+import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
-from datetime import datetime
-from flask import Flask, render_template, request, flash, redirect, url_for, send_file
-from werkzeug.utils import secure_filename
+
+from flask import Flask, render_template, request, send_file
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Import functions from your original script
 from songselect_to_pptx import lyric_converter
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 
+
 def get_version():
-    """Get app version"""
-    # Look for app_version file
-    version_file = Path('sslc_app_version')
+    version_file = Path(__file__).with_name('sslc_app_version')
     if version_file.exists():
         return version_file.read_text().strip()
-    
-    # Alternatively use an env variable
-    if 'SSLC_APP_VERSION' in os.environ:
-        return os.environ['SSLC_APP_VERSION']
-    
-    # Default value
-    return 'flask-dev-build'
+    return os.getenv('SSLC_APP_VERSION', 'flask-dev-build')
+
 
 APP_VERSION = get_version()
-logging.debug(f'APP_VERSION var = {APP_VERSION}')
-
+MAX_LYRIC_FILE_SIZE = 256 * 1024
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(24)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB limit
-app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
-
-# Below is used if a proxy is in front of flask
-# If only using WSGI set to 1
-# If using a reverse proxy with WSGI set to 2
-proxy_num = 2
-app.wsgi_app = ProxyFix(
-    app.wsgi_app, x_for=proxy_num, x_proto=proxy_num, x_host=proxy_num, x_prefix=proxy_num
+app.config.update(
+    MAX_CONTENT_LENGTH=10 * 1024 * 1024,
+    MAX_FORM_MEMORY_SIZE=128 * 1024,
+    MAX_FORM_PARTS=20,
 )
+if os.getenv('TRUSTED_HOSTS'):
+    app.config['TRUSTED_HOSTS'] = os.environ['TRUSTED_HOSTS'].split(',')
 
-# Ensure the upload folder exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-logging.debug('Temp file directory... ' + app.config['UPLOAD_FOLDER'])
+# Only enable behind a trusted proxy that replaces incoming forwarded headers.
+proxy_count = int(os.getenv('TRUSTED_PROXY_COUNT', '0'))
+if proxy_count < 0:
+    raise ValueError('TRUSTED_PROXY_COUNT must be non-negative')
+if proxy_count:
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=proxy_count, x_proto=proxy_count,
+        x_host=0, x_port=0, x_prefix=0,
+    )
+
+
+def render_index(error=None, status=200):
+    return render_template('index.html', sslc_version=APP_VERSION, error=error), status
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    base_url = '/'
-    if request.method == 'POST':
-        # Check if the post request has the file part
-        if 'files[]' not in request.files:
-            flash('No file part', 'danger')
-            return redirect(base_url)
-            
-        files = request.files.getlist('files[]')
-        logging.debug(f'Upload file list... {files}')
-        
-        # Check if files were selected
-        if not files or files[0].filename == '':
-            flash('No files selected', 'danger')
-            return redirect(base_url)
-        
-        # Check that we don't exceed 10 files
-        if len(files) > 10:
-            flash('Maximum 10 files allowed', 'danger')
-            return redirect(base_url)
-        
-        pptx_file_list = []
-        # Create temp dir to store pptx files in
-        tmp_pptx_dir_name = 'ohc_pptx_files'
-        os.makedirs(tmp_pptx_dir_name, exist_ok=True)
-        for file in files:
-            # Loop through uploaded files
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                logging.debug(f'filename var = {filename}')
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                logging.debug(f'filepath var = {filepath}')
-                file.save(filepath)
-                try:
-                    # Convert lyric file to PPTX
-                    pptx_file_location = lyric_converter(filepath, tmp_pptx_dir_name)
-                    logging.debug(f'pptx_file_location var = {pptx_file_location}')
+    if request.method == 'GET':
+        return render_index()
+    if request.headers.get('Sec-Fetch-Site') == 'cross-site':
+        return render_index('Cross-site uploads are not allowed.', 403)
 
-                    pptx_file_list.append({
-                        'pptx_file_location': f'{pptx_file_location}'
-                    })
-                except Exception as e:
-                    logging.error(f"Error processing {filename}: {str(e)}")
-                    flash(f"Error processing {filename}: {str(e)}", 'danger')
-        if pptx_file_list:
-            logging.debug(f'pptx_file_list var = {pptx_file_list}')
-            iso_timestamp = datetime.now().replace(microsecond=0).isoformat()
-            try:
-                zip_filename = f'ohc-lyric-pptx-{iso_timestamp}.zip'
-                logging.debug(f'zip_filename var = {zip_filename}')
-                zip_filepath = os.path.join(app.config['UPLOAD_FOLDER'], zip_filename)
+    files = request.files.getlist('files[]')
+    if not files or all(not file.filename for file in files):
+        return render_index('Select at least one lyric file.', 400)
+    if len(files) > 10:
+        return render_index('Maximum 10 files allowed.', 400)
+    if any(not allowed_file(file.filename) for file in files):
+        return render_index('Only .txt lyric files are allowed.', 400)
 
-                with zipfile.ZipFile(zip_filepath, 'w') as zip_folder:
-                    for pptx_file in pptx_file_list:
-                        zip_folder.write(pptx_file['pptx_file_location'])
-                return send_file(
-                    zip_filepath,
-                    as_attachment=True,
-                    download_name=zip_filename
-                )
-            except Exception as e:
-                logging.error(f'Error creating zip file: {str(e)}')
-                flash(f'Error creating zip file: {str(e)}', 'danger')
-                return redirect(base_url)
-            finally:
-                # Cleanup temp pptx dir
-                shutil.rmtree(tmp_pptx_dir_name)
-        
-    return render_template('index.html', sslc_version=APP_VERSION)
+    # Each request owns its uploads and presentations; no shared paths or teardown.
+    archive = tempfile.SpooledTemporaryFile(max_size=1024 * 1024, mode='w+b')
+    try:
+        with tempfile.TemporaryDirectory(prefix='ohc-lyrics-') as work_dir:
+            with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as bundle:
+                used_names = set()
+                for number, file in enumerate(files, 1):
+                    content = file.stream.read(MAX_LYRIC_FILE_SIZE + 1)
+                    if len(content) > MAX_LYRIC_FILE_SIZE:
+                        return render_index('Each lyric file must be 256 KiB or smaller.', 413)
+                    song_dir = Path(work_dir) / str(number)
+                    song_dir.mkdir()
+                    input_path = song_dir / 'lyrics.txt'
+                    input_path.write_bytes(content)
+                    output_path = Path(lyric_converter(input_path, song_dir))
+                    archive_name = output_path.name
+                    suffix = 2
+                    while archive_name.casefold() in used_names:
+                        archive_name = f'{output_path.stem}-{suffix}.pptx'
+                        suffix += 1
+                    used_names.add(archive_name.casefold())
+                    bundle.write(output_path, arcname=archive_name)
+        archive.seek(0)
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+        response = send_file(
+            archive, mimetype='application/zip', as_attachment=True,
+            download_name=f'ohc-lyric-pptx-{timestamp}.zip',
+            conditional=False, etag=False, max_age=0,
+        )
+        # Keep the archive open until WSGI finishes sending it, then release it.
+        response.direct_passthrough = False
+        response.call_on_close(archive.close)
+    except (ValueError, UnicodeError):
+        return render_index('Invalid lyric file. Use a UTF-8 SongSelect text export.', 400)
+    except Exception:
+        app.logger.exception('Lyric conversion failed')
+        return render_index('Conversion failed. Please try again with a SongSelect text export.', 500)
+    finally:
+        # On success the response owns the archive; close it on all failure paths.
+        if 'response' not in locals():
+            archive.close()
+    return response
+
 
 def allowed_file(filename):
-    """Check if the uploaded file is a text file"""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'txt'
+    return bool(filename) and '.' in filename and filename.rsplit('.', 1)[1].lower() == 'txt'
+
 
 @app.errorhandler(413)
-def too_large(e):
-    flash('File too large. Maximum size is 10MB.', 'danger')
-    return redirect(url_for('index'))
+def too_large(error):
+    return render_index('Upload too large. Maximum total size is 10 MiB.', 413)
 
-@app.teardown_appcontext
-def cleanup(exception=None):
-    """Clean up temporary files when the app context ends"""
-    try:
-        shutil.rmtree(app.config['UPLOAD_FOLDER'])
-        # Create a new temporary directory for the next request
-        app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    except Exception as e:
-        logging.error(f"Error cleaning up temporary files: {str(e)}")
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+@app.after_request
+def security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'same-origin'
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; script-src 'self'; style-src 'self'; "
+        "img-src 'self'; object-src 'none'; base-uri 'none'; "
+        "frame-ancestors 'none'; form-action 'self'"
+    )
+    return response
+
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080)

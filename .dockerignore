@@ -1,3 +1,6 @@
-__pycache__/
-*.pyc
-.git
+**
+!app/
+!app/**
+app/**/__pycache__/
+app/**/*.pyc
+app/**/.DS_Store
