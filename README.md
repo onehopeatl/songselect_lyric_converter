@@ -76,7 +76,11 @@ python -m pip_audit --strict --disable-pip --require-hashes -r app/requirements-
 
 CI runs conversion/security regression tests and a dependency audit before
 publishing, including a container scan that fails on high or critical vulnerabilities. A separate workflow checks Python 3.13 and 3.14 and the container on
-pull requests and weekly. Dependency updates are managed manually using the
+pull requests and weekly. Scheduled and manually triggered security runs also
+scan the published `latest` image for both AMD64 and ARM64, independently of the
+fresh build. Published-image scans fail on high or critical findings and log the
+scanned digests. They do not publish images or create update pull requests.
+Dependency updates are managed manually using the
 commands above.
 
 Uploads are limited to ten UTF-8 `.txt` files, 256 KiB per file and 10 MiB per
@@ -104,8 +108,8 @@ at the proxy. Optionally set `TRUSTED_HOSTS` to a comma-separated host allowlist
 such as `lyrics.example.org,localhost` (without URL schemes or ports).
 
 Fresh builds pull the current Python 3.14 Alpine base and apply Alpine package
-updates. Existing containers only receive these changes after rebuilding/pulling
-and recreating them:
+updates. Builds require Python 3.14.10 or newer. After publishing a rebuilt image,
+existing containers only receive the changes after pulling and recreating them:
 
 ```sh
 docker compose pull
