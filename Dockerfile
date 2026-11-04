@@ -16,7 +16,8 @@ RUN apk upgrade --no-cache \
 
 COPY app/ /app/
 ARG APP_VERSION=docker-dev-build
-RUN printf '%s\n' "$APP_VERSION" > sslc_app_version
+RUN python -c "import sys; assert sys.version_info >= (3, 14, 10), 'Python 3.14.10 or newer is required'" \
+    && printf '%s\n' "$APP_VERSION" > sslc_app_version
 
 USER converter
 EXPOSE 8080
