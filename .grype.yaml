@@ -1,0 +1,30 @@
+# Reviewed 2026-11-10. Retain Python's standard runtime while Alpine has no
+# patched sqlite-libs package. The converter has no database code or SQL input.
+# Reassess when SQLite is upgraded or any database functionality is introduced.
+# Match exact CVEs, package type, and installed version; never ignore SQLite
+# wholesale. CI displays suppressed findings so these remain visible.
+ignore:
+  - vulnerability: CVE-2026-119586
+    reason: SQLite CLI .recover issue; the sqlite3 CLI is absent from the runtime image.
+    package:
+      name: sqlite-libs
+      version: 3.53.4-r0
+      type: apk
+  - vulnerability: CVE-2026-119379
+    reason: Changeset session API issue; the converter never opens databases or applies changesets.
+    package:
+      name: sqlite-libs
+      version: 3.53.4-r0
+      type: apk
+  - vulnerability: CVE-2026-119374
+    reason: FTS5 secure-delete issue; the converter never opens databases or uses FTS5.
+    package:
+      name: sqlite-libs
+      version: 3.53.4-r0
+      type: apk
+  - vulnerability: CVE-2026-119373
+    reason: FTS5 detail=none prefix-query issue; the converter never opens databases or uses FTS5.
+    package:
+      name: sqlite-libs
+      version: 3.53.4-r0
+      type: apk

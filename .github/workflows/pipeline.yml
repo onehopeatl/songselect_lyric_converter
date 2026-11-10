@@ -40,7 +40,7 @@ jobs:
       - name: Scan container OS and library packages
         run: |
           docker save -o "$RUNNER_TEMP/ohc-image.tar" ohc-lyrics-check
-          docker run --rm -v "$RUNNER_TEMP/ohc-image.tar:/scan/image.tar:ro" docker.io/anchore/grype@sha256:6b06708b036f74b2cd70e94b706b4586af96d1932e6ac46255940b2e39dd44a9 docker-archive:/scan/image.tar --fail-on high
+          docker run --rm -v "$RUNNER_TEMP/ohc-image.tar:/scan/image.tar:ro" -v "$PWD/.grype.yaml:/scan-policy.yaml:ro" docker.io/anchore/grype@sha256:6b06708b036f74b2cd70e94b706b4586af96d1932e6ac46255940b2e39dd44a9 docker-archive:/scan/image.tar --config /scan-policy.yaml --fail-on high --show-suppressed
   build:
     needs: validate
     runs-on: ubuntu-latest
