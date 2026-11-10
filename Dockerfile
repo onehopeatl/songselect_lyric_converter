@@ -7,7 +7,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY app/requirements-pip.txt app/requirements.txt ./
+# Require the patched compression library even when the base image is older.
 RUN apk upgrade --no-cache \
+    && apk add --no-cache 'zlib>=1.4-r0' \
     && python -m pip install --upgrade --require-hashes -r requirements-pip.txt \
     && python -m pip --version \
     && python -m pip install --require-hashes -r requirements.txt \

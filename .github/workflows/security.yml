@@ -51,7 +51,7 @@ jobs:
       - name: Scan container OS and library packages
         run: |
           docker save -o "$RUNNER_TEMP/ohc-image.tar" ohc-lyrics-check
-          docker run --rm -v "$RUNNER_TEMP/ohc-image.tar:/scan/image.tar:ro" docker.io/anchore/grype@sha256:6b06708b036f74b2cd70e94b706b4586af96d1932e6ac46255940b2e39dd44a9 docker-archive:/scan/image.tar --fail-on high
+          docker run --rm -v "$RUNNER_TEMP/ohc-image.tar:/scan/image.tar:ro" -v "$PWD/.grype.yaml:/scan-policy.yaml:ro" docker.io/anchore/grype@sha256:6b06708b036f74b2cd70e94b706b4586af96d1932e6ac46255940b2e39dd44a9 docker-archive:/scan/image.tar --config /scan-policy.yaml --fail-on high --show-suppressed
   published-container:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -62,14 +62,18 @@ jobs:
     env:
       PUBLISHED_IMAGE: ghcr.io/${{ github.repository }}:latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Pull and identify the published image
         run: |
           docker pull --platform "linux/${{ matrix.architecture }}" "$PUBLISHED_IMAGE"
           docker image inspect "$PUBLISHED_IMAGE" --format '{{json .RepoDigests}}'
-          docker save -o "$RUNNER_TEMP/ohc-published-image.tar" "$PUBLISHED_IMAGE"
+          docker save --platform "linux/${{ matrix.architecture }}" -o "$RUNNER_TEMP/ohc-published-image.tar" "$PUBLISHED_IMAGE"
       - name: Scan published OS and library packages
         run: >-
           docker run --rm
           -v "$RUNNER_TEMP/ohc-published-image.tar:/scan/image.tar:ro"
+          -v "$PWD/.grype.yaml:/scan-policy.yaml:ro"
           docker.io/anchore/grype@sha256:6b06708b036f74b2cd70e94b706b4586af96d1932e6ac46255940b2e39dd44a9
-          docker-archive:/scan/image.tar --fail-on high
+          docker-archive:/scan/image.tar --config /scan-policy.yaml --fail-on high --show-suppressed
